@@ -5,7 +5,6 @@ export const GET_NO_STATE_RELATIONS = gql`
     viewer {
       works(state: WATCHED) {
         nodes {
-          title,
           seriesList {
             nodes {
               name,

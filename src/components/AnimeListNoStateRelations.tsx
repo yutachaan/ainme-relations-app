@@ -45,7 +45,7 @@ type ViewerData = {
   }
 }
 
-const seasonOrder = ['WINTER', 'SPRING', 'SUMMER', 'AUTUMN']; // リリース時期の順序
+const seasonOrder = ['WINTER', 'SPRING', 'SUMMER', 'AUTUMN'] // リリース時期の順序
 
 const AnimeListNoStateRelations = () => {
   const { loading, error, data } = useQuery<ViewerData>(GET_NO_STATE_RELATIONS)
@@ -77,25 +77,25 @@ const AnimeListNoStateRelations = () => {
       // リリース時期でソート
       uniqueNoStateWorks.sort((a, b) => {
         // リリース年と季節がどちらも未確定の場合は最後に
-        if (a.seasonYear === null && a.seasonName === null) return 1;
-        if (b.seasonYear === null && b.seasonName === null) return -1;
+        if (a.seasonYear === null && a.seasonName === null) return 1
+        if (b.seasonYear === null && b.seasonName === null) return -1
 
         // リリース年が確定している場合
         if (a.seasonYear === b.seasonYear) {
           // 片方が季節が未確定の場合はその片方をこのリリース年の中で最後に
-          if (a.seasonName === null) return 1;
-          if (b.seasonName === null) return -1;
+          if (a.seasonName === null) return 1
+          if (b.seasonName === null) return -1
 
           // 両方とも季節も確定している場合はリリース年・季節順でソート
-          return seasonOrder.indexOf(a.seasonName) - seasonOrder.indexOf(b.seasonName);
+          return seasonOrder.indexOf(a.seasonName) - seasonOrder.indexOf(b.seasonName)
         }
 
         // 片方のリリース年が未確定の場合，その片方を最後に
-        if (a.seasonYear === null) return 1;
-        if (b.seasonYear === null) return -1;
+        if (a.seasonYear === null) return 1
+        if (b.seasonYear === null) return -1
 
         // 両方のリリース年のみ確定している場合はリリース年順でソート
-        return a.seasonYear - b.seasonYear;
+        return a.seasonYear - b.seasonYear
       })
 
       setAnimeList(uniqueNoStateWorks)

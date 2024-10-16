@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useQuery } from '@apollo/client'
 import { GET_NO_STATE_RELATIONS } from '../graphql/queries'
-import { Box, Link, Text, Flex } from '@chakra-ui/react'
+import { Box, Text, Flex } from '@chakra-ui/react'
 
 type Anime = {
   annictId: number
@@ -108,15 +108,23 @@ const AnimeListNoStateRelations = () => {
     }
   }, [data])
 
+  const totalItems = animeList.length
+
   if (loading) return <Text>Loading...</Text>
   if (error) return <Text>Error: {error.message}</Text>
 
   return (
     <>
-      <Flex wrap="wrap" justify="center" p="20px">
+      <Box textAlign="center">
+        <Text mb="10px">全{totalItems}件</Text>
+      </Box>
+      <Flex wrap="wrap" justify="center">
         {animeList.map((anime) => (
           <Box
             key={anime.annictId}
+            as="a"
+            href={`https://annict.com/works/${anime.annictId}`}
+            target="_blank"
             m="10px"
             p="4"
             w="300px"
@@ -125,15 +133,13 @@ const AnimeListNoStateRelations = () => {
             borderRadius="lg"
             overflow="hidden"
             textAlign="left"
+            _hover={{ backgroundColor: 'cyan.50', transform: 'scale(1.05)', transition: 'all 0.2s' }}
           >
             <Text fontWeight="bold" fontSize="lg" mb="10px">{anime.title}</Text>
             <Text mb="10px">{anime.seriesName} ({anime.summary})</Text>
             <Text mb="10px">
-              リリース：{anime.seasonYear || '年未定'} {anime.seasonName ? seasonNameMap[anime.seasonName] : '時期未定'}
+              リリース：{anime.seasonYear + '年' || '年未定'} {anime.seasonName ? seasonNameMap[anime.seasonName] : '時期未定'}
             </Text>
-            <Link color="teal.500" href={`https://annict.com/works/${anime.annictId}`} isExternal>
-              View on Annict
-            </Link>
           </Box>
         ))}
       </Flex>

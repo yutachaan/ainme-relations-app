@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useQuery } from '@apollo/client'
 import { GET_NO_STATE_RELATIONS } from '../graphql/queries'
-import { Text } from '@chakra-ui/react'
+import { Box, Link, Text, Flex } from '@chakra-ui/react'
 
 type Anime = {
   annictId: number
@@ -45,7 +45,12 @@ type ViewerData = {
   }
 }
 
-const seasonOrder = ['WINTER', 'SPRING', 'SUMMER', 'AUTUMN'] // リリース時期の順序
+const seasonNameMap: Record<string, string> = {
+  WINTER: '冬',
+  SPRING: '春',
+  SUMMER: '夏',
+  AUTUMN: '秋'
+}
 
 const AnimeListNoStateRelations = () => {
   const { loading, error, data } = useQuery<ViewerData>(GET_NO_STATE_RELATIONS)
@@ -87,7 +92,8 @@ const AnimeListNoStateRelations = () => {
           if (b.seasonName === null) return -1
 
           // 両方とも季節も確定している場合はリリース年・季節順でソート
-          return seasonOrder.indexOf(a.seasonName) - seasonOrder.indexOf(b.seasonName)
+          return seasonNameMap[a.seasonName as keyof typeof seasonNameMap]
+            .localeCompare(seasonNameMap[b.seasonName as keyof typeof seasonNameMap])
         }
 
         // 片方のリリース年が未確定の場合，その片方を最後に
@@ -105,7 +111,34 @@ const AnimeListNoStateRelations = () => {
   if (loading) return <Text>Loading...</Text>
   if (error) return <Text>Error: {error.message}</Text>
 
-  return <></>
+  return (
+    <>
+      <Flex wrap="wrap" justify="center" p="20px">
+        {animeList.map((anime) => (
+          <Box
+            key={anime.annictId}
+            m="10px"
+            p="4"
+            w="300px"
+            h="200px"
+            borderWidth="1.5px"
+            borderRadius="lg"
+            overflow="hidden"
+            textAlign="left"
+          >
+            <Text fontWeight="bold" fontSize="lg" mb="10px">{anime.title}</Text>
+            <Text mb="10px">{anime.seriesName} ({anime.summary})</Text>
+            <Text mb="10px">
+              リリース：{anime.seasonYear || '年未定'} {anime.seasonName ? seasonNameMap[anime.seasonName] : '時期未定'}
+            </Text>
+            <Link color="teal.500" href={`https://annict.com/works/${anime.annictId}`} isExternal>
+              View on Annict
+            </Link>
+          </Box>
+        ))}
+      </Flex>
+    </>
+  )
 }
 
 export default AnimeListNoStateRelations

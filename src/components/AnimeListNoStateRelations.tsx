@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useQuery } from '@apollo/client'
 import { GET_NO_STATE_RELATIONS } from '../graphql/queries'
-import { Box, Text, Flex, Button } from '@chakra-ui/react'
+import { Box, Text, Flex, Button, CircularProgress } from '@chakra-ui/react'
 
 type Anime = {
   annictId: number
@@ -134,7 +134,13 @@ const AnimeListNoStateRelations = () => {
     }
   }
 
-  if (loading) return <Text>Loading...</Text>
+  if (loading) {
+    return (
+      <Flex justify="center" align="center" p="20px">
+        <CircularProgress isIndeterminate color='gray.400' size="80px"/>
+      </Flex>
+    )
+  }
   if (error) return <Text>Error: {error.message}</Text>
 
   return (
@@ -185,7 +191,6 @@ const AnimeListNoStateRelations = () => {
 export default AnimeListNoStateRelations
 
 // TODO
-// loading progress bar
 // ignore list (Drawer)
 // 再取得ボタン
 // ignore listをDBに保存

@@ -124,7 +124,7 @@ const AnimeListNoStateRelations = () => {
 
   // 除外リストに含まれるアニメを除外
   const filteredAnimeList = animeList.filter(anime =>
-    !ignoreList.some(keyword => anime.title.includes(keyword))
+    !ignoreList.some(keyword => (anime.title.includes(keyword) || anime.seriesName.includes(keyword)))
   )
 
   // 現在のページに表示するアニメのリストを取得

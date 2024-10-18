@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useQuery } from '@apollo/client'
 import { GET_NO_STATE_RELATIONS } from '../graphql/queries'
 import { Box, Text, Flex, Button, CircularProgress } from '@chakra-ui/react'
+import IgnoreListDrawer from './IgnoreListDrawer'
 
 type Anime = {
   annictId: number
@@ -57,6 +58,11 @@ const ITEMS_PER_PAGE = 50
 const AnimeListNoStateRelations = () => {
   const { loading, error, data } = useQuery<ViewerData>(GET_NO_STATE_RELATIONS)
   const [animeList, setAnimeList] = useState<Anime[]>([])
+  const [ignoreList, setIgnoreList] = useState<string[]>(() => {
+    // ローカルストレージから除外リストを取得
+    const storedIgnoreList = localStorage.getItem('ignoreList')
+    return storedIgnoreList ? JSON.parse(storedIgnoreList) : []
+  })
   const [currentPage, setCurrentPage] = useState(1)
 
   useEffect(() => {
@@ -76,14 +82,14 @@ const AnimeListNoStateRelations = () => {
         )
       )
 
-      // ステータスが「未選択」のアニメに限定
-      const noStateWorks = allWorks.filter((work) => work.viewerStatusState === 'NO_STATE')
-
       // 重複を削除
-      const uniqueNoStateWorks = Array.from(new Map(noStateWorks.map(work => [work.annictId, work])).values())
+      const uniqueWorks = Array.from(new Map(allWorks.map(work => [work.annictId, work])).values())
+
+      // ステータスが「未選択」のアニメに限定
+      const noStateWorks = uniqueWorks.filter((work) => work.viewerStatusState === 'NO_STATE')
 
       // リリース時期でソート
-      uniqueNoStateWorks.sort((a, b) => {
+      noStateWorks.sort((a, b) => {
         // リリース年と季節がどちらも未確定の場合は最後に
         if (a.seasonYear === null && a.seasonName === null) return 1
         if (b.seasonYear === null && b.seasonName === null) return -1
@@ -107,16 +113,25 @@ const AnimeListNoStateRelations = () => {
         return a.seasonYear - b.seasonYear
       })
 
-      setAnimeList(uniqueNoStateWorks)
+      setAnimeList(noStateWorks)
     }
   }, [data])
 
-  const totalItems = animeList.length
+  useEffect(() => {
+    // 除外リストをローカルストレージに保存
+    localStorage.setItem('ignoreList', JSON.stringify(ignoreList))
+  }, [ignoreList])
+
+  // 除外リストに含まれるアニメを除外
+  const filteredAnimeList = animeList.filter(anime =>
+    !ignoreList.some(keyword => anime.title.includes(keyword))
+  )
 
   // 現在のページに表示するアニメのリストを取得
+  const totalItems = filteredAnimeList.length
   const indexOfLastAnime = currentPage * ITEMS_PER_PAGE
   const indexOfFirstAnime = indexOfLastAnime - ITEMS_PER_PAGE
-  const currentAnimeList = animeList.slice(indexOfFirstAnime, indexOfLastAnime)
+  const currentAnimeList = filteredAnimeList.slice(indexOfFirstAnime, indexOfLastAnime)
 
   const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE)
 
@@ -145,6 +160,7 @@ const AnimeListNoStateRelations = () => {
 
   return (
     <Flex direction="column" align="center" p="20px">
+      <IgnoreListDrawer ignoreList={ignoreList} setIgnoreList={setIgnoreList} />
       <Text fontSize="xl" fontWeight="bold">
         全 {totalItems} 件
       </Text>

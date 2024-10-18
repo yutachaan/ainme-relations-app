@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useQuery } from '@apollo/client'
 import { GET_NO_STATE_RELATIONS } from '../graphql/queries'
-import { Box, Text, Flex } from '@chakra-ui/react'
+import { Box, Text, Flex, Button } from '@chakra-ui/react'
 
 type Anime = {
   annictId: number
@@ -52,9 +52,12 @@ const seasonNameMap: Record<string, string> = {
   AUTUMN: '秋'
 }
 
+const ITEMS_PER_PAGE = 50
+
 const AnimeListNoStateRelations = () => {
   const { loading, error, data } = useQuery<ViewerData>(GET_NO_STATE_RELATIONS)
   const [animeList, setAnimeList] = useState<Anime[]>([])
+  const [currentPage, setCurrentPage] = useState(1)
 
   useEffect(() => {
     if (data) {
@@ -110,16 +113,37 @@ const AnimeListNoStateRelations = () => {
 
   const totalItems = animeList.length
 
+  // 現在のページに表示するアニメのリストを取得
+  const indexOfLastAnime = currentPage * ITEMS_PER_PAGE
+  const indexOfFirstAnime = indexOfLastAnime - ITEMS_PER_PAGE
+  const currentAnimeList = animeList.slice(indexOfFirstAnime, indexOfLastAnime)
+
+  const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE)
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1)
+      window.scrollTo({ top: 0, behavior: 'instant' })
+    }
+  }
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1)
+      window.scrollTo({ top: 0, behavior: 'instant' })
+    }
+  }
+
   if (loading) return <Text>Loading...</Text>
   if (error) return <Text>Error: {error.message}</Text>
 
   return (
-    <>
-      <Box textAlign="center">
-        <Text mb="10px">全{totalItems}件</Text>
-      </Box>
-      <Flex wrap="wrap" justify="center">
-        {animeList.map((anime) => (
+    <Flex direction="column" align="center" p="20px">
+      <Text fontSize="xl" fontWeight="bold">
+        全 {totalItems} 件
+      </Text>
+      <Flex wrap="wrap" justify="center" p="20px">
+        {currentAnimeList.map((anime) => (
           <Box
             key={anime.annictId}
             as="a"
@@ -136,15 +160,33 @@ const AnimeListNoStateRelations = () => {
             _hover={{ backgroundColor: 'cyan.50', transform: 'scale(1.05)', transition: 'all 0.2s' }}
           >
             <Text fontWeight="bold" fontSize="lg" mb="10px">{anime.title}</Text>
-            <Text mb="10px">{anime.seriesName} ({anime.summary})</Text>
+            <Text mb="10px">{anime.seriesName} {anime.summary ? '(' + anime.summary + ')' : ''}</Text>
             <Text mb="10px">
-              リリース：{anime.seasonYear + '年' || '年未定'} {anime.seasonName ? seasonNameMap[anime.seasonName] : '時期未定'}
+              リリース：{anime.seasonYear || '年未定'} {anime.seasonName ? seasonNameMap[anime.seasonName] : '時期未定'}
             </Text>
           </Box>
         ))}
       </Flex>
-    </>
+      <Flex mt="4">
+        <Button onClick={handlePrevPage} isDisabled={currentPage === 1} mr="4">
+          前へ
+        </Button>
+        <Text fontSize="lg" align="center" mt="2">
+          {currentPage} / {totalPages}
+        </Text>
+        <Button onClick={handleNextPage} isDisabled={currentPage === totalPages} ml="4">
+          次へ
+        </Button>
+      </Flex>
+    </Flex>
   )
 }
 
 export default AnimeListNoStateRelations
+
+// TODO
+// loading progress bar
+// ignore list (Drawer)
+// 再取得ボタン
+// ignore listをDBに保存
+// font変更

@@ -33,14 +33,19 @@ const IgnoreListDrawer = ({ ignoreList, setIgnoreList }: IgnoreListDrawerProps) 
         <DrawerContent>
           <DrawerHeader>除外リスト</DrawerHeader>
           <DrawerBody>
-            <Flex justifyContent="space-between" justify="center" mt="4">
-              <Input
-                value={keyword}
-                placeholder="キーワードを入力"
-                onChange={(e) => setKeyword(e.target.value)}
-              />
-              <Button onClick={handleAddKeyword} ml="2" colorScheme="teal">追加</Button>
-            </Flex>
+            <form onSubmit={(e) => {
+              e.preventDefault()
+              handleAddKeyword()
+            }}>
+              <Flex justifyContent="space-between" justify="center" mt="4">
+                <Input
+                  value={keyword}
+                  placeholder="キーワードを入力"
+                  onChange={(e) => setKeyword(e.target.value)}
+                />
+                <Button onClick={handleAddKeyword} ml="2" colorScheme="teal">追加</Button>
+              </Flex>
+            </form>
             <UnorderedList mt="4" spacing="2" ml="0px">
               {ignoreList.map(keyword => (
                 <ListItem key={keyword} listStyleType={"none"}>

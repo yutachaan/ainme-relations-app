@@ -47,10 +47,10 @@ type ViewerData = {
 }
 
 const seasonNameMap: Record<string, string> = {
-  WINTER: '冬',
-  SPRING: '春',
+  AUTUMN: '秋',
   SUMMER: '夏',
-  AUTUMN: '秋'
+  SPRING: '春',
+  WINTER: '冬',
 }
 
 const ITEMS_PER_PAGE = 50
@@ -88,7 +88,7 @@ const AnimeListNoStateRelations = () => {
       // ステータスが「未選択」のアニメに限定
       const noStateWorks = uniqueWorks.filter((work) => work.viewerStatusState === 'NO_STATE')
 
-      // リリース時期でソート
+      // リリース時期を直近順でソート
       noStateWorks.sort((a, b) => {
         // リリース年と季節がどちらも未確定の場合は最後に
         if (a.seasonYear === null && a.seasonName === null) return 1
@@ -101,8 +101,8 @@ const AnimeListNoStateRelations = () => {
           if (b.seasonName === null) return -1
 
           // 両方とも季節も確定している場合はリリース年・季節順でソート
-          return seasonNameMap[a.seasonName as keyof typeof seasonNameMap]
-            .localeCompare(seasonNameMap[b.seasonName as keyof typeof seasonNameMap])
+          return seasonNameMap[b.seasonName as keyof typeof seasonNameMap]
+            .localeCompare(seasonNameMap[a.seasonName as keyof typeof seasonNameMap])
         }
 
         // 片方のリリース年が未確定の場合，その片方を最後に
@@ -110,7 +110,7 @@ const AnimeListNoStateRelations = () => {
         if (b.seasonYear === null) return -1
 
         // 両方のリリース年のみ確定している場合はリリース年順でソート
-        return a.seasonYear - b.seasonYear
+        return b.seasonYear - a.seasonYear
       })
 
       setAnimeList(noStateWorks)
@@ -147,6 +147,16 @@ const AnimeListNoStateRelations = () => {
       setCurrentPage(currentPage - 1)
       window.scrollTo({ top: 0, behavior: 'instant' })
     }
+  }
+
+  const handleFirstPage = () => {
+    setCurrentPage(1)
+    window.scrollTo({ top: 0, behavior: 'instant' })
+  }
+
+  const handleLastPage = () => {
+    setCurrentPage(totalPages)
+    window.scrollTo({ top: 0, behavior: 'instant' })
   }
 
   if (loading) {
@@ -190,6 +200,9 @@ const AnimeListNoStateRelations = () => {
         ))}
       </Flex>
       <Flex mt="4">
+        <Button onClick={handleFirstPage} isDisabled={currentPage === 1} mr="2">
+          先頭へ
+        </Button>
         <Button onClick={handlePrevPage} isDisabled={currentPage === 1} mr="4">
           前へ
         </Button>
@@ -199,6 +212,9 @@ const AnimeListNoStateRelations = () => {
         <Button onClick={handleNextPage} isDisabled={currentPage === totalPages} ml="4">
           次へ
         </Button>
+        <Button onClick={handleLastPage} isDisabled={currentPage === totalPages} ml="2">
+          末尾へ
+        </Button>
       </Flex>
     </Flex>
   )
@@ -207,7 +223,5 @@ const AnimeListNoStateRelations = () => {
 export default AnimeListNoStateRelations
 
 // TODO
-// ignore list (Drawer)
-// 再取得ボタン
+// Annictアカウントを打つと，そのアカウントの未視聴アニメを取得
 // ignore listをDBに保存
-// font変更

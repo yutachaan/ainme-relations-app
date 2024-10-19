@@ -27,7 +27,7 @@ const IgnoreListDrawer = ({ ignoreList, setIgnoreList }: IgnoreListDrawerProps) 
 
   return (
     <>
-      <Button onClick={() => setIsOpen(true)} mb="6">除外リストを開く</Button>
+      <Button onClick={() => setIsOpen(true)}>除外リストを開く</Button>
       <Drawer isOpen={isOpen} placement="right" onClose={() => setIsOpen(false)} blockScrollOnMount={false}>
         <DrawerOverlay />
         <DrawerContent>

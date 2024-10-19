@@ -1,21 +1,21 @@
-import { gql } from '@apollo/client'
+import { gql } from "@apollo/client";
 
-export const GET_NO_STATE_RELATIONS = gql`
-  query {
-    viewer {
+export const GET_ANIME_LIST = gql`
+  query getAnimeList($username: String!) {
+    user(username: $username) {
       works(state: WATCHED) {
         nodes {
           seriesList {
             nodes {
-              name,
+              name
               works {
                 edges {
-                  summary,
+                  summary
                   item {
-                    annictId,
-                    seasonName,
-                    seasonYear,
-                    title,
+                    annictId
+                    seasonName
+                    seasonYear
+                    title
                     viewerStatusState
                   }
                 }

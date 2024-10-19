@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useQuery } from '@apollo/client'
-import { GET_NO_STATE_RELATIONS } from '../graphql/queries'
 import { Box, Text, Flex, Button, CircularProgress } from '@chakra-ui/react'
+import { GET_ANIME_LIST } from '../graphql/queries'
 import IgnoreListDrawer from './IgnoreListDrawer'
 
 type Anime = {
@@ -38,8 +38,8 @@ type WorksNode = {
   }
 }
 
-type ViewerData = {
-  viewer: {
+type UserData = {
+  user: {
     works: {
       nodes: WorksNode[]
     }
@@ -56,7 +56,9 @@ const seasonNameMap: Record<string, string> = {
 const ITEMS_PER_PAGE = 50
 
 const AnimeListNoStateRelations = () => {
-  const { loading, error, data } = useQuery<ViewerData>(GET_NO_STATE_RELATIONS)
+  const { loading, error, data } = useQuery<UserData>(GET_ANIME_LIST, {
+    variables: { username: 'yunta' }
+  })
   const [animeList, setAnimeList] = useState<Anime[]>([])
   const [ignoreList, setIgnoreList] = useState<string[]>(() => {
     // ローカルストレージから除外リストを取得
@@ -68,7 +70,7 @@ const AnimeListNoStateRelations = () => {
   useEffect(() => {
     if (data) {
       // すべての視聴済みアニメの関連作品を取得し，フラット化
-      const allWorks: Anime[] = data.viewer.works.nodes.flatMap((worksNode: WorksNode) =>
+      const allWorks: Anime[] = data.user.works.nodes.flatMap((worksNode: WorksNode) =>
         worksNode.seriesList.nodes.flatMap((seriesNode: SeriesNode) =>
           seriesNode.works.edges.map((seriesWorksEdge: SeriesWorksEdge) => ({
             annictId: seriesWorksEdge.item.annictId,
@@ -170,7 +172,9 @@ const AnimeListNoStateRelations = () => {
 
   return (
     <Flex direction="column" align="center" p="20px">
-      <IgnoreListDrawer ignoreList={ignoreList} setIgnoreList={setIgnoreList} />
+      <Box mb="6">
+        <IgnoreListDrawer ignoreList={ignoreList} setIgnoreList={setIgnoreList} />
+      </Box>
       <Text fontSize="xl" fontWeight="bold">
         全 {totalItems} 件
       </Text>
@@ -223,5 +227,5 @@ const AnimeListNoStateRelations = () => {
 export default AnimeListNoStateRelations
 
 // TODO
-// Annictアカウントを打つと，そのアカウントの未視聴アニメを取得
-// ignore listをDBに保存
+// パフォーマンス最適化
+// Atomic Design
